@@ -1,0 +1,15 @@
+{
+  "auth": {
+    "email": "<xauth-email>",
+    "key": "<xauth-key>"
+  },
+  "zone": {
+    "name": "example.com",
+    "records": [
+      "example.com",
+      "www.example.com",
+      "foo.example.com",
+      "bar.example.com"
+    ]
+  }
+}
