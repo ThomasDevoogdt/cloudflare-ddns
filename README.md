@@ -2,6 +2,11 @@
 Simple Cloudflare DDNS update script for domain and subdomains.
 I just created a quick and dirty sketch to update my personal DDNS records. It should be enough for most users, feel free to use.
 
+
+In the config.json file is:
+    email: email of the cloudflare account
+    key: the global api key
+
 ## usage
 
 ```bash
