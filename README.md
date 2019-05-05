@@ -2,14 +2,6 @@
 Simple Cloudflare DDNS update script for domain and subdomains.
 I just created a quick and dirty sketch to update my personal DDNS records. It should be enough for most users, feel free to use.
 
-
-In the config.json file is:
-
-&nbsp;&nbsp;&nbsp;&nbsp;email: email of the cloudflare account
-
-&nbsp;&nbsp;&nbsp;&nbsp;key: the global api key
-
-
 ## usage
 * ```--config```: config path
 * ```--repeat```: (optional) repeat every x seconds
@@ -19,6 +11,8 @@ $ python3.6 main.py --config config/config.json [--repeat 30]
 ```
 
 ## config.json
+* email: cloudflare account
+* key: global api key
 
 ```json
 {
