@@ -37,3 +37,17 @@ $ python3.6 main.py --config config/config.json [--repeat 30]
     }
 }
 ```
+
+## docker
+##### build
+```
+docker build -t cloudflare-ddns .
+```
+
+##### run
+* ```-v $(pwd)/config.json:/config.json```: mount config folder to docker container
+* ```--config config.json --repeat 30```: the same usage of the main.py app
+
+```
+docker run -v $(pwd)/config.json:/config.json -t cloudflare-ddns --config config.json --repeat 30
+```
