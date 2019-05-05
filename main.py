@@ -5,6 +5,7 @@ import http.client
 import json
 import logging
 import os
+import time
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,6 +18,7 @@ def early_exit(reason, level=logging.ERROR):
 def parse_args():
     parser = argparse.ArgumentParser(description='CloudFlare DDNS')
     parser.add_argument('-c', '--config', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-r', '--repeat', type=int, required=False)
     return parser.parse_args()
 
 
@@ -97,25 +99,16 @@ def push_cloudflare_record(xauth_header, zone_id, record_id, record_name, ipv4):
         return False
 
 
-def main():
-    args = parse_args()
-
-    config = get_config(args.config)
-    if not config:
-        early_exit("could not properly load config file, exiting")
-
+def update_ddns(config):
     ipv4 = get_ipv4()
-    if not ipv4:
-        early_exit("could not fetch ipv4 address, exiting")
+    assert ipv4, "could not fetch ipv4 address, exiting"
 
     logging.info("current IP address: %s" % ipv4)
-    if not is_new_ipv4(ipv4):
-        early_exit("ipv4 not changed, exiting", logging.INFO)
+    assert is_new_ipv4(ipv4), "ipv4 not changed, exiting"
 
     xauth_header = get_xauth(config)
     zone_identifier = get_cloudflare_zone_identifier(xauth_header, config["zone"]["name"])
-    if not zone_identifier:
-        early_exit("could not fetch zone identifier, exiting")
+    assert zone_identifier, "could not fetch zone identifier, exiting"
 
     for record in config["zone"]["records"]:
         record_identifier = get_cloudflare_record_identifier(xauth_header, zone_identifier, record)
@@ -125,5 +118,26 @@ def main():
             logging.error("api update failed for zone record %s" % record)
 
 
+def main():
+    args = parse_args()
+
+    config = get_config(args.config)
+    assert config, "could not properly load config file, exiting"
+
+    while True:
+        try:
+            update_ddns(config)
+        except AssertionError as e:
+            logging.info(e)
+        if not args.repeat:
+            break
+        time.sleep(args.repeat)
+
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except AssertionError as e:
+        logging.info(e)
+    except KeyboardInterrupt:
+        early_exit("Keyboard exception received. Exiting.", logging.INFO)

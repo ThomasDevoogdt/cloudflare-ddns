@@ -11,9 +11,11 @@ In the config.json file is:
 
 
 ## usage
+* ```--config```: config path
+* ```--repeat```: (optional) repeat every x seconds
 
 ```bash
-$ python3.6 main.py --config config.json
+$ python3.6 main.py --config config/config.json [--repeat 30]
 ```
 
 ## config.json
