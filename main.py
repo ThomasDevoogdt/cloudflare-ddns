@@ -5,18 +5,28 @@ import http.client
 import json
 import logging
 import os
+import sys
 import time
 
 logging.basicConfig(level=logging.INFO)
 
 
-def early_exit(reason, level=logging.ERROR):
-    logging.log(level, reason)
-    exit(0 if level <= logging.INFO else 1)
-
-
 def parse_args():
-    parser = argparse.ArgumentParser(description='CloudFlare DDNS')
+    prefix = "DDNS_"
+    for env_key, value in os.environ.items():
+        if env_key.startswith(prefix):
+            argv_key = "--%s" % env_key[len(prefix):].lower()
+            if argv_key not in sys.argv:
+                sys.argv.append(argv_key)
+                sys.argv.append(value)
+
+    epilog = str('Arguments can also be applied with environment variables, prefixed with "DDNS_".\n'
+                 'e.g.:\n'
+                 '    * export DDNS_CONFIG=config.json :  --config config.json\n'
+                 '    * export DDNS_REPEAT=5 :            --repeat 5\n')
+
+    parser = argparse.ArgumentParser(description='CloudFlare DDNS', epilog=epilog,
+        formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--config', type=argparse.FileType('r'), required=True)
     parser.add_argument('-r', '--repeat', type=int, required=False)
     return parser.parse_args()
@@ -140,4 +150,4 @@ if __name__ == "__main__":
     except AssertionError as e:
         logging.info(e)
     except KeyboardInterrupt:
-        early_exit("Keyboard exception received. Exiting.", logging.INFO)
+        logging.info("Keyboard exception received. Exiting.")
