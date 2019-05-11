@@ -8,9 +8,6 @@ import os
 import sys
 import time
 
-logging.basicConfig(level=logging.INFO)
-
-
 def parse_args():
     prefix = "DDNS_"
     for env_key, value in os.environ.items():
@@ -29,6 +26,7 @@ def parse_args():
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--config', type=argparse.FileType('r'), required=True)
     parser.add_argument('-r', '--repeat', type=int, required=False)
+    parser.add_argument('--log-level', type=str, required=False, default='info', choices=['debug','error','info'])
     return parser.parse_args()
 
 
@@ -112,24 +110,27 @@ def push_cloudflare_record(xauth_header, zone_id, record_id, record_name, ipv4):
 def update_ddns(config):
     ipv4 = get_ipv4()
     assert ipv4, "could not fetch ipv4 address, exiting"
-
-    logging.info("current IP address: %s" % ipv4)
-    assert is_new_ipv4(ipv4), "ipv4 not changed, exiting"
+    assert is_new_ipv4(ipv4), "ipv4 (%s) not changed, exiting" % ipv4
+    logging.info("new ip address: %s" % ipv4)
 
     xauth_header = get_xauth(config)
     zone_identifier = get_cloudflare_zone_identifier(xauth_header, config["zone"]["name"])
     assert zone_identifier, "could not fetch zone identifier, exiting"
 
+    logging.info("start updating cloudflare ddns records")
     for record in config["zone"]["records"]:
         record_identifier = get_cloudflare_record_identifier(xauth_header, zone_identifier, record)
         if record_identifier and push_cloudflare_record(xauth_header, zone_identifier, record_identifier, record, ipv4):
             logging.info("ip changed to %s for zone record %s" % (ipv4, record))
         else:
             logging.error("api update failed for zone record %s" % record)
+    logging.info("updating cloudflare ddns done")
 
 
 def main():
     args = parse_args()
+    logging.basicConfig(level=args.log_level.upper())
+    logging.info("starting cloudflare ddns service")
 
     config = get_config(args.config)
     assert config, "could not properly load config file, exiting"
@@ -138,7 +139,7 @@ def main():
         try:
             update_ddns(config)
         except AssertionError as e:
-            logging.info(e)
+            logging.debug(e)
         if not args.repeat:
             break
         time.sleep(args.repeat)
@@ -148,6 +149,6 @@ if __name__ == "__main__":
     try:
         main()
     except AssertionError as e:
-        logging.info(e)
+        logging.error(e)
     except KeyboardInterrupt:
         logging.info("Keyboard exception received. Exiting.")
