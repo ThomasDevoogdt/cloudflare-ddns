@@ -12,7 +12,7 @@ def parse_args():
     prefix = "DDNS_"
     for env_key, value in os.environ.items():
         if env_key.startswith(prefix):
-            argv_key = "--%s" % env_key[len(prefix):].lower()
+            argv_key = "--%s" % env_key[len(prefix):].lower().replace("_", "-")
             if argv_key not in sys.argv:
                 sys.argv.append(argv_key)
                 sys.argv.append(value)
