@@ -39,7 +39,14 @@ Arguments can also be applied with environment variables, prefixed with "DDNS_":
 ```
 
 ## docker
-##### build
+##### getting started
+###### docker pull command
+https://hub.docker.com/r/thomasdevoogdt/cloudflare-ddns
+```
+docker pull thomasdevoogdt/cloudflare-ddns
+```
+
+###### docker manual build
 ```
 docker build -t cloudflare-ddns .
 ```
