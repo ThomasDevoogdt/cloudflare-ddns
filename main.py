@@ -2,6 +2,7 @@
 
 import argparse
 import http.client
+import ipaddress
 import json
 import logging
 import os
@@ -39,15 +40,29 @@ def get_config(config):
         config.close()
 
 
+IP_PROVIDERS = [
+    ("ifconfig.me", "/ip"),
+    ("ip.42.pl", "/raw"),
+    ("ipinfo.io", "/ip"),
+    ("api.ipify.org", "/"),
+    ("ip4.seeip.org", "/")
+]
+
+
 def get_ipv4():
-    try:
-        conn = http.client.HTTPConnection("ifconfig.me")
-        conn.request("GET", "/ip", "")
-        return conn.getresponse().read().decode("utf-8")
-    except:
-        return None
-    finally:
-        conn.close()
+    for provider in IP_PROVIDERS:
+        try:
+            conn = http.client.HTTPConnection(provider[0], timeout=10)
+            conn.request("GET", provider[1], "")
+            response = conn.getresponse().read().decode("utf-8").strip()
+            ip = ipaddress.ip_address(response)
+            assert isinstance(ip, ipaddress.IPv4Address)
+            return str(ip)
+        except:
+            continue
+        finally:
+            conn.close()
+    return None
 
 
 def is_new_ipv4(ipv4):
