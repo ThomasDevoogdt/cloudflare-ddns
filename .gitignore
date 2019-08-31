@@ -1,1 +1,5 @@
 ipv4.txt
+
+.idea
+.vscode
+*.pyc
