@@ -39,6 +39,28 @@ Arguments can also be applied with environment variables, prefixed with "DDNS_":
 }
 ```
 
+## config.json v2.0
+
+Records can now also be defined with a dictionary. The record should always contain the ```"name"``` key. See the record object definitions for optional attributes at https://api.cloudflare.com/#dns-records-for-a-zone-create-dns-record.
+
+```json
+{
+    "auth": {
+        "email": "user@example.com",
+        "key": "c2547eb745079dac9320b638f5e225cf483cc5cfdda41"
+    },
+    "zone": {
+        "name": "example.com",
+        "records": [
+            "example.com",
+            {"name": "www.example.com", "proxied": true},
+            "foo.example.com",
+            {"name": "bar.example.com", "proxied": false}
+        ]
+    }
+}
+```
+
 ## docker
 ##### getting started
 ###### docker pull command
