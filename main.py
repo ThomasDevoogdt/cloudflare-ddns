@@ -116,18 +116,28 @@ def get_cloudflare_zone_identifier(xauth_header, zone):
         return None
 
 
-def get_cloudflare_record_identifier(xauth_header, zone_id, record_name):
+def parse_record(record):
+    if isinstance(record, str):
+        return {"name": record}
+    else:
+        assert isinstance(record.get("name"), str), "not a valid record name provided"
+        return record
+
+
+def get_cloudflare_record_identifier(xauth_header, zone_id, record):
     try:
-        url = "/client/v4/zones/%s/dns_records?name=%s" % (zone_id, record_name)
+        url = "/client/v4/zones/%s/dns_records?name=%s" % (zone_id, record["name"])
         return cloudflare_url("GET", url, "", xauth_header)["result"][0]["id"]
     except (KeyError, TypeError):
         return None
 
 
-def push_cloudflare_record(xauth_header, zone_id, record_id, record_name, ipv4):
+def push_cloudflare_record(xauth_header, zone_id, record_id, record, ipv4):
     try:
         url = "/client/v4/zones/%s/dns_records/%s" % (zone_id, record_id)
-        data = json.dumps({"id": zone_id, "type": "A", "name": record_name, "proxied": True, "content": ipv4})
+        cloudflare_record = {"id": zone_id, "type": "A", "name": None, "proxied": True, "content": ipv4}
+        cloudflare_record.update(record)
+        data = json.dumps(cloudflare_record)
         return cloudflare_url("PUT", url, data, xauth_header)["success"]
     except (KeyError, TypeError):
         return False
@@ -145,11 +155,12 @@ def update_ddns(config):
 
     logging.info("start updating cloudflare ddns records")
     for record in config["zone"]["records"]:
-        record_identifier = get_cloudflare_record_identifier(xauth_header, zone_identifier, record)
-        if record_identifier and push_cloudflare_record(xauth_header, zone_identifier, record_identifier, record, ipv4):
-            logging.info("ip changed to %s for zone record %s" % (ipv4, record))
+        parsed_record = parse_record(record)
+        record_identifier = get_cloudflare_record_identifier(xauth_header, zone_identifier, parsed_record)
+        if record_identifier and push_cloudflare_record(xauth_header, zone_identifier, record_identifier, parsed_record, ipv4):
+            logging.info("ip changed to %s for zone record %s" % (ipv4, parsed_record["name"]))
         else:
-            logging.error("api update failed for zone record %s" % record)
+            logging.error("api update failed for zone record %s" % parsed_record["name"])
     logging.info("updating cloudflare ddns done")
 
 
