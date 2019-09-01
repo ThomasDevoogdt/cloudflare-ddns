@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import errno
 import http.client
 import ipaddress
 import json
@@ -8,6 +9,8 @@ import logging
 import os
 import sys
 import time
+
+IPV4_FILE = "ipv4.txt"
 
 def parse_args():
     prefix = "DDNS_"
@@ -27,6 +30,7 @@ def parse_args():
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--config', type=argparse.FileType('r'), required=True)
     parser.add_argument('-r', '--repeat', type=int, required=False)
+    parser.add_argument('-f', '--force', action='store_true', required=False)
     parser.add_argument('--log-level', type=str, required=False, default='info', choices=['debug','error','info'])
     return parser.parse_args()
 
@@ -66,17 +70,24 @@ def get_ipv4():
 
 
 def is_new_ipv4(ipv4):
-    if os.path.isfile("ipv4.txt"):
-        ipv4_file = open("ipv4.txt", "r")
+    if os.path.isfile(IPV4_FILE):
+        ipv4_file = open(IPV4_FILE, "r")
         old_ipv4 = ipv4_file.read()
         ipv4_file.close()
         if ipv4 == old_ipv4:
             return False
 
-    ipv4_file = open("ipv4.txt", "w")
+    ipv4_file = open(IPV4_FILE, "w")
     ipv4_file.write(ipv4)
     ipv4_file.close()
     return True
+
+
+def clear_cache():
+    try:
+        os.remove(IPV4_FILE)
+    except OSError as e:
+        assert e.errno == errno.ENOENT
 
 
 def get_xauth(config):
@@ -146,6 +157,10 @@ def main():
     args = parse_args()
     logging.basicConfig(level=args.log_level.upper())
     logging.info("starting cloudflare ddns service")
+
+    if args.force:
+        logging.info("forcing ip upload by clearing cache")
+        clear_cache()
 
     config = get_config(args.config)
     assert config, "could not properly load config file, exiting"

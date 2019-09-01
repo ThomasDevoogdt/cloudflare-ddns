@@ -6,9 +6,10 @@ I just created a quick and dirty sketch to update my personal DDNS records. It s
 * ```--config```: config path
 * ```--repeat```: (optional) repeat every x seconds
 * ```--log-level```: (optional) debug/info/error
+* ```--force```: (optional) force ip upload
 
 ```bash
-$ python3.6 main.py --config config.json [--repeat 30]
+$ python3.6 main.py --config config.json [--repeat 30] [--force]
 ```
 
 Arguments can also be applied with environment variables, prefixed with "DDNS_":
