@@ -1,6 +1,6 @@
 # cloudflare-ddns
-Simple Cloudflare DDNS update script for domain and subdomains.
-I just created a quick and dirty sketch to update my personal DDNS records. It should be enough for most users, feel free to use.
+Simple multi-record Cloudflare DDNS update script for domain and subdomains.
+I just created a quick and dirty sketch to update my personal DDNS records. It should be enough for most users, feel free to use. The reason why I didn't use one of the hundreds of existing docker DDNS services is that I couldn't find any that supports multi-record DDNS updates.
 
 ## usage
 * ```--config```: config path
