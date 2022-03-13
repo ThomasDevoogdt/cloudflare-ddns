@@ -61,6 +61,35 @@ Records can now also be defined with a dictionary. The record should always cont
 }
 ```
 
+## config.json v3.0
+
+More than one zone can now be defined under the ```"zones"``` key. The old ```"zone"``` key is still valid and is seen as one zone.
+
+```json
+{
+    "auth": {
+        "email": "user@example.com",
+        "key": "c2547eb745079dac9320b638f5e225cf483cc5cfdda41"
+    },
+    "zones": [
+        {
+            "name": "example.com",
+            "records": [
+                "example.com",
+                "foo.example.com",
+            ]
+        },
+        {
+            "name": "example2.com",
+            "records": [
+                "example2.com",
+                "bar.example2.com",
+            ]
+        }
+    ]
+}
+```
+
 ## docker
 ##### getting started
 ###### docker pull command
