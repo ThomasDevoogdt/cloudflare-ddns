@@ -12,6 +12,7 @@ import time
 
 IPV4_FILE = "ipv4.txt"
 
+
 def parse_args():
     prefix = "DDNS_"
     for env_key, value in os.environ.items():
@@ -27,11 +28,11 @@ def parse_args():
                  '    * export DDNS_REPEAT=5 :            --repeat 5\n')
 
     parser = argparse.ArgumentParser(description='CloudFlare DDNS', epilog=epilog,
-        formatter_class=argparse.RawTextHelpFormatter)
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--config', type=argparse.FileType('r'), required=True)
     parser.add_argument('-r', '--repeat', type=int, required=False)
     parser.add_argument('-f', '--force', action='store_true', required=False)
-    parser.add_argument('--log-level', type=str, required=False, default='info', choices=['debug','error','info'])
+    parser.add_argument('--log-level', type=str, required=False, default='info', choices=['debug', 'error', 'info'])
     return parser.parse_args()
 
 
